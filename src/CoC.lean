@@ -96,8 +96,7 @@ def bound_vars : Π (e : Exp), finset string
 | _ := ∅ 
 
 -- TODO: this throws the famous 'no goals' error
-def pigeonhole
-  : Π (ys : finset string) (xs : finset string), 
+def pigeonhole : Π (ys : finset string) (xs : finset string), 
   (finset.card ys < finset.card xs) → finset.nonempty (xs \ ys)
 | ys := λ xs h, if h2 : finset.card ys = 0 then begin 
     have h3 : xs = xs \ ys, rw [finset.ext], intro,
@@ -116,16 +115,15 @@ def pigeonhole
     exact nat.lt_of_succ_lt h,
     rw [finset.card_erase_of_mem h_1, finset.card_erase_of_mem h_2],
     exact nat.pred_lt_pred h6 h,
-    have h8 : finset.erase ys w ⊂ ys, exact finset.erase_ssubset h_1,
+    let h8 : finset.erase ys w ⊂ ys := finset.erase_ssubset h_1,
     let ne := pigeonhole (finset.erase ys w) (finset.erase xs w) h',
     cases ne.bex, have h4 : w_1 ∈ xs \ ys, rw [finset.mem_sdiff] at h_2, cases h_2,
     simp [finset.mem_of_mem_erase] at h_2_left, cases h_2_left with neq inxs,
     let h5 : w_1 ∉ ys := mt (finset.mem_erase_of_ne_of_mem neq) h_2_right,
     simp, exact ⟨inxs, h5⟩, exact ⟨w_1, h4⟩,
   end
-using_well_founded 
-  {rel_tac := λ e es, `[exact ⟨_,(@finset.lt_wf string)⟩] >> wf_tacs.rel_tac e es,
-  dec_tac := `[assumption] }
+using_well_founded { rel_tac := λ e es, `[exact ⟨_,(@finset.lt_wf string)⟩],
+    dec_tac := `[assumption] }
 
 def mk_name (x : string) : nat → string
 | 0 := x
@@ -341,8 +339,7 @@ end
 
 -- See for example "Strong Normalization for the Calculus of Constructions"
 -- by Chris Casinghino, 2010 ([snforcc])
-def beta_reduce_terminates {g e t} : Judgement g e t → (beta_reduce e).dom 
-  := sorry
+axiom beta_reduce_terminates {g e t} : Judgement g e t → (beta_reduce e).dom 
 
 inductive TypeError : Type
 | TypeMismatch : Exp → Exp → TypeError
@@ -359,9 +356,11 @@ open except
 instance tc_has_bind : has_bind TC := { bind := λ _ _, except.bind }
 
 -- | Lookup a variable in a well-formed context.
-def lookup (x : string) : Π (g : Context) (h : ContextWF g), TC (Σ t, Judgement g (Exp.free x) t)
+def lookup (x : string) : Π (g : Context) (h : ContextWF g), 
+  TC (Σ t, Judgement g (Exp.free x) t)
 | (Context.empty) h := error (UnboundVar x)
-| (Context.cons y e g') (ContextWF.cons h_h h_noShadowing h_a) := match string.has_decidable_eq x y with
+| (Context.cons y e g') (ContextWF.cons h_h h_noShadowing h_a) := 
+  match string.has_decidable_eq x y with
   | (is_true p) := ok ⟨e, (eq.mp (by simp [p]) (Judgement.start y h_noShadowing h_a))⟩
   | (is_false p) := lookup g' h_h >>= λ ⟨a_fst, a_snd⟩, 
       ok ⟨a_fst, Judgement.weaken y h_noShadowing a_snd h_a⟩
