@@ -3,8 +3,9 @@ import tactic.norm_num
 
 import Terms
 
-/-- This file deals with the generation of fresh variable names -/
+/-! This file deals with the generation of fresh variable names -/
 
+/-- The pigeonhole principle for finsets -/
 lemma pigeonhole : Π (ys : finset string) (xs : finset string), 
   (finset.card ys < finset.card xs) → finset.nonempty (xs \ ys)
 | ys := λ xs h, if h2 : finset.card ys = 0 then 
@@ -116,7 +117,7 @@ lemma fresh_avoids_capture {x b xs} (h : free_vars b ⊆ xs)
   : abstract (fresh xs x) (instantiate (Exp.free (fresh xs x)) b) = b :=
   fresh_avoids_capture_help h 0
 
--- | Top-level one-step beta reduction.
+/-- Top-level one-step beta reduction. -/
 def head_reduce : Exp → Exp
 | (Exp.app a b) := match a with
     Exp.lam _ _ d := instantiate b d,

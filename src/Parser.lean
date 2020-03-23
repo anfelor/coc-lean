@@ -1,8 +1,9 @@
 import data.list
 import data.pfun
 
--- A simple parser combinator library
--- Similar to http://dev.stephendiehl.com/fun/002_parsers.html
+/-! A simple parser combinator library
+    Similar to http://dev.stephendiehl.com/fun/002_parsers.html
+-/
 
 universes u v
 

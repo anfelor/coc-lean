@@ -4,7 +4,12 @@ import Terms
 import CoC
 import TypeCheck
 
-/-! This file will eventually contain a proof that CoC Types form a category. -/
+/-! 
+  This file will eventually contain a proof that CoC Types form a category.
+  We allow semantically equal but syntactical different types to be different
+  objects. In contrast, we consider morphisms only in the class of beta-equivalences
+  to prove things like 'f = f ∘ id'.
+-/
 
 open PTSSort
 open BetaOpt
@@ -35,7 +40,6 @@ def idR : Exp -> Exp := λ A, (Exp.lam "x" A (Exp.bound 0))
 
 -- TODO(anton): This is instant with eval but reduce doesn't terminate
 -- even in 15 min with --tstack=30000
--- Still, it would be nice to get the judgements for free..
 #eval typecheck (idR (Exp.sort star)) (Context.empty) (ContextWF.empty)
 
 instance pts_cat_struct : category_theory.category_struct PTSType :=

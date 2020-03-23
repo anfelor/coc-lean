@@ -11,16 +11,21 @@ import FreshNames
 
 open PTSSort
 
---| The terms we introduced are general enough to be able to represent the 
--- untyped lambda calculus, therefore we can't give a provably terminating
--- beta reduction without using the judgements below. 
--- But even then the proof is too involved to be placed here.
--- We therefore proceed in two steps:
--- First we form the equivalence class of terms that
--- can be beta-reduced into each other (suggested by Mario Carneiro).
--- This is the reflexive symmetric transitive closure of head_reduce anywhere in a term.
--- Second we define a non-provably-terminating beta-reduction that gives
--- us a proof object of where the beta-reduction has to take place.
+/--
+  The terms we introduced are general enough to be able to represent the 
+  untyped lambda calculus, therefore we can't give a provably terminating
+  beta reduction without using the judgements below. 
+  But even then the proof is too involved to be placed here.
+  We therefore proceed in two steps:
+  First we form the equivalence class of terms that
+  can be beta-reduced into each other (suggested by Mario Carneiro).
+  This is the reflexive symmetric transitive closure of head_reduce anywhere in a term.
+  Second we define a non-provably-terminating beta-reduction that gives
+  us a proof object of where the beta-reduction has to take place.
+-/
+
+/- 'Beta Red' is a reduction (the reflexive transitive closure) 
+    and 'Beta Eq' an equivalence (the reflexive symmetric transitive closure) -/
 inductive BetaOpt | Red | Eq
 open BetaOpt
 
@@ -40,6 +45,8 @@ inductive Beta : BetaOpt → Exp → Exp → Type
 | app : Π {A B C D} (r s t) (h : t = beta_merge r s), 
     Beta r A B → Beta s C D → 
     Beta t (Exp.app A C) (Exp.app B D)
+
+-- We have to carry h to make the equation compiler happy :/
 | lam : Π (x : string) {A B C D} (r s t) (h : t = beta_merge r s),
     Beta r A B → Beta s C D → 
     Beta t (Exp.lam x A C) (Exp.lam x B D)
@@ -101,12 +108,13 @@ inductive Rule : PTSSort → PTSSort → Type
 | vdt : Rule box star
 | tdv : Rule star box
 
--- | Valid judgements in the CoC. 
--- A judgement carries a context, a value and its type.
--- Unlike in the standard presentation we allow to set the variable
--- x' here. That is okay, since the standard presentation only 
--- considers terms up to alpha-equivalence. It is necessary,
--- since we can model shadowed variables this way.
+/-- Valid judgements in the CoC. 
+  A judgement carries a context, a value and its type.
+  Unlike in the standard presentation we allow to set the variable
+  x' in the 'abs' constructor. That is okay, since the standard presentation only 
+  considers terms up to alpha-equivalence. It is necessary,
+  since we can model shadowed variables this way.
+-/
 inductive Judgement : Context → Exp → Exp → Prop
 | starInBox : Judgement (Context.empty) (Exp.sort star) (Exp.sort box)
 | start {g A s} (x : string) (noShadowing : x ∉ context_domain g) : Judgement g A (Exp.sort s) 

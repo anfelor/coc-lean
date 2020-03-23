@@ -4,6 +4,15 @@ import CoC
 open PTSSort
 open BetaOpt
 
+/-! The type checker. -/
+
+/- 
+  Since Judgements are in Prop, we have to jump through some hoops
+  to write nearly trivial functions. But Judgements belong to Prop
+  not least because the type checker would be noncomputable if they
+  were in type due to some hard to prove statements.
+-/
+
 inductive TypeError : Type
 | TypeMismatch : Exp → Exp → TypeError
 | UnboundIndex : nat → TypeError
@@ -26,6 +35,7 @@ def type_error_repr : TypeError -> string
 instance type_error_has_repr : has_repr TypeError :=
   { repr := type_error_repr }
 
+/-- The type checker monad -/
 def TC := except TypeError
 open except
 instance tc_has_bind : has_bind TC := { bind := λ _ _, except.bind }
@@ -39,10 +49,11 @@ instance tc_has_repr {a} {h : has_repr a} : has_repr (TC a) :=
 instance type_psigma_has_repr {g e} : has_repr (Σ' t : Exp, Judgement g e t) :=
   { repr := λ s, repr s.fst }
 
+/- This instance is necessary for #eval -/
 instance type_tc_has_repr {g e} : has_repr (TC (Σ' t : Exp, Judgement g e t)) :=
   { repr := (@tc_has_repr _ type_psigma_has_repr).repr }
 
--- | Lookup a variable in a well-formed context.
+/-- Lookup a variable in a well-formed context. -/
 def lookup (x : string) : Π (g : Context) (h : ContextWF g), 
   TC (Σ' t, Judgement g (Exp.free x) t)
 | (Context.empty) h := error (UnboundVar x)
@@ -50,14 +61,10 @@ def lookup (x : string) : Π (g : Context) (h : ContextWF g),
   match string.has_decidable_eq x y with
   | (is_true p) := ok ⟨e, begin simp [p], cases h, 
       exact Judgement.start y h_noShadowing h_a, end⟩
-  | (is_false p) := 
-      let f : (Σ' t, Judgement g' (Exp.free x) t) 
-        -> TC (Σ' t, Judgement (Context.cons y e g') (Exp.free x) t) 
-        := begin
+  | (is_false p) := lookup g' (by { cases h, assumption }) >>= (begin 
         intro a, apply ok, cases a, apply psigma.mk, cases h, 
         exact Judgement.weaken y h_noShadowing a_snd h_a,
-      end
-      in lookup g' (by { cases h, assumption }) >>= f
+      end)
   end
 
 def find_rule : Π (s t : PTSSort), Rule s t
