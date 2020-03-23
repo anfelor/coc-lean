@@ -2,15 +2,15 @@ import category_theory.category
 
 import Terms
 import CoC
+import TypeCheck
 
-/-! This file will eventually contain a proof that CoC Types form a category.
-    It is very much incomplete and depends on computablility of the type-checker. -/
+/-! This file will eventually contain a proof that CoC Types form a category. -/
 
 open PTSSort
 open BetaOpt
 
 inductive ChurchRosser : Exp → Exp → Prop
-| mk : Π (A B : Exp), (Σ z, prod (Beta Eq A z) (Beta Eq B z)) → ChurchRosser A B
+| mk : Π (A B : Exp), (Σ z, (Beta Eq A z) × (Beta Eq B z)) → ChurchRosser A B
 
 def Expr := quot ChurchRosser
 def reduce : Exp → Expr := quot.mk ChurchRosser
@@ -30,6 +30,13 @@ inductive PTSMorphism : PTSType → PTSType → Type
 
 instance pts_has_hom : category_theory.has_hom PTSType := 
   { hom := PTSMorphism }
+
+def idR : Exp -> Exp := λ A, (Exp.lam "x" A (Exp.bound 0))
+
+-- TODO(anton): This is instant with eval but reduce doesn't terminate
+-- even in 15 min with --tstack=30000
+-- Still, it would be nice to get the judgements for free..
+#eval typecheck (idR (Exp.sort star)) (Context.empty) (ContextWF.empty)
 
 instance pts_cat_struct : category_theory.category_struct PTSType :=
   { id := λ X,

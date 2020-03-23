@@ -107,7 +107,7 @@ inductive Rule : PTSSort → PTSSort → Type
 -- x' here. That is okay, since the standard presentation only 
 -- considers terms up to alpha-equivalence. It is necessary,
 -- since we can model shadowed variables this way.
-inductive Judgement : Context → Exp → Exp → Type
+inductive Judgement : Context → Exp → Exp → Prop
 | starInBox : Judgement (Context.empty) (Exp.sort star) (Exp.sort box)
 | start {g A s} (x : string) (noShadowing : x ∉ context_domain g) : Judgement g A (Exp.sort s) 
   → Judgement (Context.cons x A g) (Exp.free x) A
@@ -129,10 +129,10 @@ inductive Judgement : Context → Exp → Exp → Type
   : (Beta Eq A B) → Judgement g B (Exp.sort s) → Judgement g M A
   → Judgement g M B
 
-inductive ContextWF : Context → Type
+inductive ContextWF : Context → Prop
 | empty : ContextWF Context.empty
-| cons : Π {x A g s} (h : ContextWF g) (noShadowing : x ∉ context_domain g), Judgement g A (Exp.sort s)
-  → ContextWF (Context.cons x A g)
+| cons : Π {x A g s} (h : ContextWF g) (noShadowing : x ∉ context_domain g), 
+  Judgement g A (Exp.sort s) → ContextWF (Context.cons x A g)
 
 def judgement_context_wf {g A B} : Judgement g A B → ContextWF g :=
 begin
