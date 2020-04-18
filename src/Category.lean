@@ -41,6 +41,8 @@ def idR : Exp -> Exp := λ A, (Exp.lam "x" A (Exp.bound 0))
 -- TODO(anton): This is instant with eval but reduce doesn't terminate
 -- even in 15 min with --tstack=30000
 #eval typecheck (idR (Exp.sort star)) (Context.empty) (ContextWF.empty)
+#eval typecheck (Exp.lam "x" (Exp.sort star) (Exp.bound 0)) (Context.empty) (ContextWF.empty)
+#eval typecheck (Exp.lam "x" (Exp.sort star) (Exp.bound 1)) (Context.empty) (ContextWF.empty)
 
 instance pts_cat_struct : category_theory.category_struct PTSType :=
   { id := λ X,

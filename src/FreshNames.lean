@@ -61,7 +61,6 @@ lemma mk_name_len (x : string) (n : nat)
 begin
   induction n, simp [mk_name], simp [mk_name, string.length_append, n_ih],
   have h : string.length "'" = 1 := by refl, rw [h, nat.succ_eq_add_one],
-  norm_num,
 end
 
 lemma mk_name_inj (x : string) : function.injective (mk_name x) := 
@@ -94,19 +93,18 @@ lemma fresh_avoids_capture_help {x b xs} (h : free_vars b ⊆ xs) (n : nat)
 begin
   induction b generalizing n, 
     simp, cases eq.decidable (fresh xs x) b,
-      simp [h_1], simp [free_vars] at h,
-      have h_3 := finset.mem_of_subset h (finset.mem_singleton_self b),
-      from absurd h_1 (fresh_is_fresh h_3),
+      simp [h_1], simp at h,
+      from absurd h_1 (fresh_is_fresh h),
     cases eq.decidable b n, iterate 2 { simp [h_1] },
     simp,
 
-    simp [free_vars] at h,
+    simp at h,
     let h_a := finset.subset.trans (finset.subset_union_left _ _) h,
     let h_a_1 := finset.subset.trans (finset.subset_union_right _ _) h,
     simp [b_ih_a h_a, b_ih_a_1 h_a_1],
 
   iterate 2 {
-    simp [free_vars] at h,
+    simp at h,
     let h_a_1 := finset.subset.trans (finset.subset_union_left _ _) h,
     let h_a_2 := finset.subset.trans (finset.subset_union_right _ _) h,
     simp [b_ih_a h_a_1, b_ih_a_1 h_a_2], },

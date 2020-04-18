@@ -87,7 +87,7 @@ def substitute (x : string) (r : Exp) (e : Exp) : Exp :=
   instantiate r (abstract x e)
 
 /-- The free variables in an expression -/
-def free_vars : Π (e : Exp), finset string
+@[simp] def free_vars : Π (e : Exp), finset string
 | (Exp.free x) := finset.singleton x
 | (Exp.app a b) := free_vars a ∪ free_vars b
 | (Exp.lam _ a b) := free_vars a ∪ free_vars b
@@ -96,7 +96,7 @@ def free_vars : Π (e : Exp), finset string
 | (Exp.sort _) := ∅
 
 /-- The bound variables -/
-def bound_vars : Π (e : Exp), finset string
+@[simp] def bound_vars : Π (e : Exp), finset string
 | (Exp.app a b) := free_vars a ∪ free_vars b
 | (Exp.lam x a b) := insert x (free_vars a ∪ free_vars b)
 | (Exp.pi x a b) := insert x (free_vars a ∪ free_vars b)
